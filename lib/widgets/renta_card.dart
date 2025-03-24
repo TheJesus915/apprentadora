@@ -13,9 +13,6 @@ class RentaCard extends StatelessWidget {
   final VoidCallback onTap;
   final RentasService rentasService;
 
-  static const String currentDate = '2025-03-23 18:46:45';
-  static const String currentUser = 'TheJesus915';
-
   const RentaCard({
     Key? key,
     required this.renta,
@@ -38,7 +35,7 @@ class RentaCard extends StatelessWidget {
       case 'Entregado':
         return Colors.purple;
       case 'Finalizado':
-        return Colors.grey;
+        return Colors.grey[700]!;
       default:
         return Colors.green;
     }
@@ -91,33 +88,24 @@ class RentaCard extends StatelessWidget {
       _closeDialog(context);
 
       if (response.success && response.data != null) {
-        // Formatear la URL para asegurar que sea compatible con Google Maps
         String urlString = response.data!.urlMaps;
 
-        // Asegurarse de que la URL use https
         if (!urlString.startsWith('https://')) {
           urlString = urlString.replaceFirst('http://', 'https://');
         }
 
-        // Intentar primero con la URL de Google Maps web
         Uri? url = Uri.tryParse(urlString);
 
         if (url != null) {
-          // Intentar abrir en Google Maps app primero
           String mapsUrl = 'comgooglemaps://?${url.query}';
           if (await canLaunchUrl(Uri.parse(mapsUrl))) {
             await launchUrl(Uri.parse(mapsUrl));
-          }
-          // Si no se puede abrir en la app, intentar con la URL web
-          else if (await canLaunchUrl(url)) {
+          } else if (await canLaunchUrl(url)) {
             await launchUrl(
               url,
               mode: LaunchMode.externalApplication,
             );
-          }
-          // Si ambos fallan, intentar con geo URI
-          else {
-            // Extraer coordenadas de la URL
+          } else {
             final coordsPattern = RegExp(r'/(-?\d+\.\d+),(-?\d+\.\d+)/');
             final matches = coordsPattern.allMatches(urlString);
 
@@ -169,7 +157,7 @@ class RentaCard extends StatelessWidget {
               children: const [
                 CircularProgressIndicator(),
                 SizedBox(height: 16),
-                Text('Obteniendo ruta...'),
+                Text('Procesando...'),
               ],
             ),
           ),
@@ -224,6 +212,63 @@ class RentaCard extends StatelessWidget {
     }
   }
 
+  Future<void> _navigateToFinalizarRecoleccion(BuildContext context) async {
+    try {
+      final confirmar = await showDialog<bool>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Finalizar Renta'),
+            content: const Text('¿Estás seguro de que deseas finalizar esta renta?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancelar'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.green,
+                ),
+                child: const Text('Finalizar'),
+              ),
+            ],
+          );
+        },
+      );
+
+      if (confirmar != true) return;
+
+      _showLoadingDialog(context);
+
+      final response = await rentasService.finalizarRenta(renta.idRenta);
+
+      _closeDialog(context);
+
+      if (!context.mounted) return;
+
+      if (response['success'] == true) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Renta finalizada correctamente'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+        onTap(); // Actualizar la lista de rentas
+      } else {
+        throw Exception(response['message'] ?? 'Error al finalizar la renta');
+      }
+    } catch (e) {
+      if (!context.mounted) return;
+      _showErrorSnackBar(
+        context,
+        'Error: ${e.toString().replaceAll('Exception:', '').trim()}',
+      );
+    }
+  }
+
   Widget _buildActionButtons(BuildContext context) {
     print('Estado actual: "${renta.estado}"'); // Debug print
 
@@ -246,7 +291,6 @@ class RentaCard extends StatelessWidget {
       case 'En Transito_Recoleccion':
       case 'En_Transito_Recoleccion':
       case 'En_transito_Recoleccion':
-        print('Mostrando botones de recolección'); // Debug print
         return Row(
           children: [
             Expanded(
@@ -300,36 +344,24 @@ class RentaCard extends StatelessWidget {
           ],
         );
 
+      case 'Finalizado':
+        return Container(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Text(
+            'Renta finalizada',
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 14,
+              fontStyle: FontStyle.italic,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        );
+
       default:
         print('Estado no manejado: "${renta.estado}"'); // Debug print
         return const SizedBox.shrink();
     }
-  }
-
-  Future<void>
-
-
-
-
-  (BuildContext context) async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => FinalizarRecoleccionPage(
-          renta: renta,
-          rentasService: rentasService,
-          onRentaFinalizada: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Renta finalizada correctamente'),
-                backgroundColor: Colors.green,
-              ),
-            );
-            onTap(); // Para actualizar la lista de rentas
-          },
-        ),
-      ),
-    );
   }
 
   Widget _buildButton({
@@ -442,11 +474,6 @@ class RentaCard extends StatelessWidget {
                         ),
                       ],
                     ),
-                  ),
-                  Icon(
-                    Icons.arrow_forward_ios,
-                    color: Colors.grey[400],
-                    size: 20,
                   ),
                 ],
               ),

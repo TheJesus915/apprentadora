@@ -361,6 +361,7 @@ class _RentasPageState extends State<RentasPage> {
                     ordenAscendente
                         ? Icons.arrow_upward
                         : Icons.arrow_downward,
+                    color: Colors.white, // Color blanco para el icono
                   ),
                   label: Text(
                     ordenAscendente
@@ -368,7 +369,7 @@ class _RentasPageState extends State<RentasPage> {
                         : 'Más reciente primero',
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
+                    backgroundColor: Color(0xFF00345E),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     shape: RoundedRectangleBorder(

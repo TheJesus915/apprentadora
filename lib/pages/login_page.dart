@@ -81,8 +81,8 @@ class _LoginPageState extends State<LoginPage> {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Color(0xFF2196F3),
-                  Color(0xFF1976D2),
+                  Color(0xFFFFFFFF), // Color de inicio del gradiente (azul)
+                  Color(0xFFFFFFFF), // Color de fin del gradiente (blanco)
                 ],
               ),
             ),
@@ -90,34 +90,28 @@ class _LoginPageState extends State<LoginPage> {
               children: [
                 SizedBox(height: 60),
                 // Logo o Imagen
-                Container(
+                Image.asset(
+                  'assets/images/logo.png',
                   height: 120,
                   width: 120,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black26,
-                        blurRadius: 10,
-                        offset: Offset(0, 5),
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    Icons.person,
-                    size: 80,
-                    color: Color(0xFF1976D2),
-                  ),
+                  fit: BoxFit.contain,
                 ),
                 SizedBox(height: 40),
                 // Título
                 Text(
                   'Bienvenido',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: Color(0xFF00345E),
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  'Ingresa tus credenciales correctas',
+                  style: TextStyle(
+                    color: Color(0xFF00345E),
+                    fontSize: 16,
                   ),
                 ),
                 SizedBox(height: 40),
@@ -127,6 +121,7 @@ class _LoginPageState extends State<LoginPage> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
                   ),
+                  color: Color(0xFFF5F5F5), // Color personalizado para la Card
                   child: Padding(
                     padding: EdgeInsets.all(20),
                     child: Column(
@@ -135,7 +130,7 @@ class _LoginPageState extends State<LoginPage> {
                           controller: emailController,
                           decoration: InputDecoration(
                             labelText: 'Correo electrónico',
-                            prefixIcon: Icon(Icons.email, color: Color(0xFF1976D2)),
+                            prefixIcon: Icon(Icons.email, color: Color(0xFF00345E),),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
@@ -147,6 +142,8 @@ class _LoginPageState extends State<LoginPage> {
                               borderRadius: BorderRadius.circular(10),
                               borderSide: BorderSide(color: Color(0xFF1976D2)),
                             ),
+                            filled: true,
+                            fillColor: Colors.white,
                           ),
                           keyboardType: TextInputType.emailAddress,
                         ),
@@ -155,11 +152,11 @@ class _LoginPageState extends State<LoginPage> {
                           controller: passwordController,
                           decoration: InputDecoration(
                             labelText: 'Contraseña',
-                            prefixIcon: Icon(Icons.lock, color: Color(0xFF1976D2)),
+                            prefixIcon: Icon(Icons.lock, color: Color(0xFF00345E),),
                             suffixIcon: IconButton(
                               icon: Icon(
                                 _obscureText ? Icons.visibility : Icons.visibility_off,
-                                color: Color(0xFF1976D2),
+                                color: Color(0xFF00345E),
                               ),
                               onPressed: () {
                                 setState(() {
@@ -178,6 +175,8 @@ class _LoginPageState extends State<LoginPage> {
                               borderRadius: BorderRadius.circular(10),
                               borderSide: BorderSide(color: Color(0xFF1976D2)),
                             ),
+                            filled: true,
+                            fillColor: Colors.white,
                           ),
                           obscureText: _obscureText,
                         ),
@@ -188,7 +187,7 @@ class _LoginPageState extends State<LoginPage> {
                           child: ElevatedButton(
                             onPressed: isLoading ? null : login,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Color(0xFF1976D2),
+                              backgroundColor: Color(0xFF00345E),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
@@ -206,6 +205,7 @@ class _LoginPageState extends State<LoginPage> {
                                 : Text(
                               'Iniciar Sesión',
                               style: TextStyle(
+                                color: Color(0xFFFFFFFF),
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -217,18 +217,6 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 SizedBox(height: 20),
-                TextButton(
-                  onPressed: () {
-                    // Implementar navegación a recuperar contraseña
-                  },
-                  child: Text(
-                    '¿Olvidaste tu contraseña?',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
               ],
             ),
           ),

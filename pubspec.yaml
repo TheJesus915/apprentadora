@@ -30,7 +30,6 @@ dependencies:
   flutter_image_compress: ^2.1.0
   webview_flutter: ^4.4.2
 
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -48,4 +47,4 @@ flutter_launcher_icons:
 flutter:
   uses-material-design: true
   assets:
-    - assets/images/
+    - assets/images/logo.png
