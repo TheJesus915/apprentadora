@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'pages/login_page.dart';
 import 'pages/dashboard_page.dart';
 
@@ -22,7 +23,25 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        // Agregamos configuración para el DatePicker
+        datePickerTheme: DatePickerThemeData(
+          headerBackgroundColor: Colors.deepPurple,
+          headerForegroundColor: Colors.white,
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.transparent,
+        ),
       ),
+      // Agregamos soporte para localización
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('es', 'ES'), // Español
+        Locale('en', 'US'), // Inglés
+      ],
+      locale: const Locale('es', 'ES'), // Establecemos español como idioma predeterminado
       initialRoute: isLoggedIn ? '/dashboard' : '/login',
       routes: {
         '/login': (context) => LoginPage(),

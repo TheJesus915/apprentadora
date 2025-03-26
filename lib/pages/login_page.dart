@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../api/auth_service.dart';
 import '../models/login_model.dart';
+import '../pages/dashboard_page.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -33,8 +34,7 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     if (response.success) {
-      Navigator.pushReplacementNamed(
-          context, response.necesitaPago ? '/pago-necesario' : '/dashboard');
+      Navigator.pushReplacementNamed(context, '/dashboard');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -70,6 +70,8 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Rest of your build method remains the same
+    // No changes needed in the UI part since it didn't contain any payment-related elements
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -81,15 +83,14 @@ class _LoginPageState extends State<LoginPage> {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Color(0xFFFFFFFF), // Color de inicio del gradiente (azul)
-                  Color(0xFFFFFFFF), // Color de fin del gradiente (blanco)
+                  Color(0xFFFFFFFF),
+                  Color(0xFFFFFFFF),
                 ],
               ),
             ),
             child: Column(
               children: [
                 SizedBox(height: 60),
-                // Logo o Imagen
                 Image.asset(
                   'assets/images/logo.png',
                   height: 120,
@@ -97,7 +98,6 @@ class _LoginPageState extends State<LoginPage> {
                   fit: BoxFit.contain,
                 ),
                 SizedBox(height: 40),
-                // Título
                 Text(
                   'Bienvenido',
                   style: TextStyle(
@@ -115,13 +115,12 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 SizedBox(height: 40),
-                // Campos de entrada
                 Card(
                   elevation: 8,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
                   ),
-                  color: Color(0xFFF5F5F5), // Color personalizado para la Card
+                  color: Color(0xFFF5F5F5),
                   child: Padding(
                     padding: EdgeInsets.all(20),
                     child: Column(
@@ -130,7 +129,7 @@ class _LoginPageState extends State<LoginPage> {
                           controller: emailController,
                           decoration: InputDecoration(
                             labelText: 'Correo electrónico',
-                            prefixIcon: Icon(Icons.email, color: Color(0xFF00345E),),
+                            prefixIcon: Icon(Icons.email, color: Color(0xFF00345E)),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
@@ -152,7 +151,7 @@ class _LoginPageState extends State<LoginPage> {
                           controller: passwordController,
                           decoration: InputDecoration(
                             labelText: 'Contraseña',
-                            prefixIcon: Icon(Icons.lock, color: Color(0xFF00345E),),
+                            prefixIcon: Icon(Icons.lock, color: Color(0xFF00345E)),
                             suffixIcon: IconButton(
                               icon: Icon(
                                 _obscureText ? Icons.visibility : Icons.visibility_off,

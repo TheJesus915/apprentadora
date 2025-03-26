@@ -153,47 +153,9 @@ class _IniciarRecoleccionPageState extends State<IniciarRecoleccionPage> {
 
       if (response.success) {
         if (response.data?.urlMaps != null) {
-          final abrirMaps = await showDialog<bool>(
-            context: context,
-            barrierDismissible: false,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: const Text('Recolección Iniciada'),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(response.message),
-                    const SizedBox(height: 16),
-                    ElevatedButton.icon(
-                      icon: const Icon(Icons.map),
-                      label: const Text('Abrir en Google Maps'),
-                      onPressed: () async {
-                        final url = Uri.parse(response.data!.urlMaps);
-                        if (await canLaunchUrl(url)) {
-                          await launchUrl(url, mode: LaunchMode.externalApplication);
-                        }
-                      },
-                    ),
-                  ],
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context); // Cerrar diálogo
-                      Navigator.pop(context, true); // Volver a la página anterior
-                    },
-                    child: const Text('Aceptar'),
-                  ),
-                ],
-              );
-            },
-          );
-
-          if (abrirMaps == true) {
-            final url = Uri.parse(response.data!.urlMaps);
-            if (await canLaunchUrl(url)) {
-              await launchUrl(url, mode: LaunchMode.externalApplication);
-            }
+          final url = Uri.parse(response.data!.urlMaps);
+          if (await canLaunchUrl(url)) {
+            await launchUrl(url, mode: LaunchMode.externalApplication);
           }
         }
 

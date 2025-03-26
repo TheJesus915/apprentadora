@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/intl.dart';
 import '../api/rentas_service.dart';
 import '../models/renta_model.dart';
 import '../widgets/renta_card.dart';
@@ -23,8 +25,11 @@ class _RentasPageState extends State<RentasPage> {
   bool ordenAscendente = true;
   String filtroEstado = 'todos';
 
-  // Constantes actualizadas
-  static const String currentDate = '2025-03-23 17:32:23';
+  // Single date filter variable
+  DateTime? filtroFecha;
+
+  // Constants
+  static const String currentDate = '2025-03-25 19:31:39';
   static const String currentUser = 'TheJesus915';
 
   @override
@@ -101,8 +106,16 @@ class _RentasPageState extends State<RentasPage> {
 
   List<Renta> get rentasFiltradas {
     return rentas.where((renta) {
-      if (filtroEstado == 'todos') return true;
-      return renta.estado == filtroEstado;
+      // First filter by state
+      bool estadoValido = filtroEstado == 'todos' || renta.estado == filtroEstado;
+
+      // Then filter by date if a date is selected
+      bool fechaValida = filtroFecha == null ||
+          DateTime.parse(renta.fechas.inicio).day == filtroFecha!.day &&
+              DateTime.parse(renta.fechas.inicio).month == filtroFecha!.month &&
+              DateTime.parse(renta.fechas.inicio).year == filtroFecha!.year;
+
+      return estadoValido && fechaValida;
     }).toList();
   }
 
@@ -210,7 +223,6 @@ class _RentasPageState extends State<RentasPage> {
 
   Future<void> _verRuta(Renta renta) async {
     try {
-      // Primero obtener la ubicación actual
       final position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
@@ -306,6 +318,42 @@ class _RentasPageState extends State<RentasPage> {
     );
   }
 
+  Future<void> _seleccionarFecha() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2030),
+      initialDate: filtroFecha ?? DateTime.now(),
+      locale: const Locale('es', 'ES'),
+      builder: (context, child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: Color(0xFF00345E),
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: Colors.black,
+            ),
+            dialogBackgroundColor: Colors.white,
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null && picked != filtroFecha) {
+      setState(() {
+        filtroFecha = picked;
+      });
+    }
+  }
+
+  void _limpiarFiltroFecha() {
+    setState(() {
+      filtroFecha = null;
+    });
+  }
+
   Widget _buildEmptyState() {
     return Center(
       child: Column(
@@ -325,7 +373,7 @@ class _RentasPageState extends State<RentasPage> {
             ),
           ),
           const SizedBox(height: 8),
-          if (filtroEstado != 'todos')
+          if (filtroEstado != 'todos' || filtroFecha != null)
             Text(
               'Prueba cambiando los filtros',
               style: TextStyle(
@@ -341,108 +389,195 @@ class _RentasPageState extends State<RentasPage> {
   Widget _buildFiltros() {
     return Padding(
       padding: const EdgeInsets.all(16),
-      child: Row(
+      child: Column(
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Ordenar por fecha',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey[700],
-                  ),
-                ),
-                const SizedBox(height: 8),
-                ElevatedButton.icon(
-                  onPressed: _toggleOrden,
-                  icon: Icon(
-                    ordenAscendente
-                        ? Icons.arrow_upward
-                        : Icons.arrow_downward,
-                    color: Colors.white, // Color blanco para el icono
-                  ),
-                  label: Text(
-                    ordenAscendente
-                        ? 'Más antiguo primero'
-                        : 'Más reciente primero',
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF00345E),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Ordenar por fecha',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey[700],
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 8),
+                    ElevatedButton.icon(
+                      onPressed: _toggleOrden,
+                      icon: Icon(
+                        ordenAscendente
+                            ? Icons.arrow_upward
+                            : Icons.arrow_downward,
+                        color: Colors.white,
+                      ),
+                      label: Text(
+                        ordenAscendente
+                            ? 'Más antiguo primero'
+                            : 'Más reciente primero',
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF00345E),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Filtrar por estado',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey[300]!),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: filtroEstado,
+                          isExpanded: true,
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              filtroEstado = newValue!;
+                            });
+                          },
+                          items: const [
+                            DropdownMenuItem(
+                              value: 'todos',
+                              child: Text('Todos'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'Pendiente',
+                              child: Text('Pendiente'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'Pendiente_Pago',
+                              child: Text('Pendiente de Pago'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'En transito_Recoleccion',
+                              child: Text('En Recolección'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'En transito_Envio',
+                              child: Text('En Tránsito'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'Entregado',
+                              child: Text('Entregado'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'Finalizado',
+                              child: Text('Finalizado'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Filtrar por estado',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey[700],
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey[300]!),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      value: filtroEstado,
-                      isExpanded: true,
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          filtroEstado = newValue!;
-                        });
-                      },
-                      items: const [
-                        DropdownMenuItem(
-                          value: 'todos',
-                          child: Text('Todos'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'Pendiente',
-                          child: Text('Pendiente'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'Pendiente_Pago',
-                          child: Text('Pendiente de Pago'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'En transito_Recoleccion',
-                          child: Text('En Recolección'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'En transito_Envio',
-                          child: Text('En Tránsito'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'Entregado',
-                          child: Text('Entregado'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'Finalizado',
-                          child: Text('Finalizado'),
-                        ),
-                      ],
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Filtrar por fecha',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey[700],
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 8),
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: filtroFecha != null
+                              ? const Color(0xFF00345E)
+                              : Colors.grey[300]!,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: MaterialButton(
+                              onPressed: _seleccionarFecha,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    filtroFecha == null
+                                        ? 'Seleccionar Fecha'
+                                        : DateFormat('dd/MM/yyyy')
+                                        .format(filtroFecha!),
+                                    style: TextStyle(
+                                      color: filtroFecha != null
+                                          ? const Color(0xFF00345E)
+                                          : Colors.grey[600],
+                                    ),
+                                  ),
+                                  Icon(
+                                    Icons.calendar_today,
+                                    color: filtroFecha != null
+                                        ? const Color(0xFF00345E)
+                                        : Colors.grey[600],
+                                    size: 20,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          if (filtroFecha != null)
+                            Container(
+                              decoration: const BoxDecoration(
+                                border: Border(
+                                  left: BorderSide(
+                                    color: Color(0xFF00345E),
+                                    width: 1,
+                                  ),
+                                ),
+                              ),
+                              child: IconButton(
+                                icon: const Icon(
+                                  Icons.close,
+                                  color: Color(0xFF00345E),
+                                  size: 20,
+                                ),
+                                onPressed: _limpiarFiltroFecha,
+                                tooltip: 'Limpiar filtro de fecha',
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),
@@ -514,7 +649,6 @@ class _RentasPageState extends State<RentasPage> {
           ],
         ),
       ),
-
     );
   }
 }

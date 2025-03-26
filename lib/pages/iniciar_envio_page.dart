@@ -126,6 +126,7 @@ class _IniciarEnvioPageState extends State<IniciarEnvioPage> {
       });
     }
   }
+
   Future<void> _getCurrentLocation() async {
     try {
       setState(() {
@@ -403,24 +404,19 @@ class _IniciarEnvioPageState extends State<IniciarEnvioPage> {
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
-                    children: [
-                      const Icon(
+                    children: const [
+                      Icon(
                         Icons.location_on,
                         color: Colors.green,
                         size: 36,
                       ),
-                      const SizedBox(height: 8),
-                      const Text(
+                      SizedBox(height: 8),
+                      Text(
                         'Ubicación obtenida',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Colors.green,
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Lat: ${_currentPosition!.latitude}\nLong: ${_currentPosition!.longitude}',
-                        textAlign: TextAlign.center,
                       ),
                     ],
                   ),
@@ -434,7 +430,7 @@ class _IniciarEnvioPageState extends State<IniciarEnvioPage> {
                   : _iniciarEnvio,
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.all(16),
-                backgroundColor: Colors.blue,
+                backgroundColor: Color(0xFF00345E),
                 foregroundColor: Colors.white,
               ),
               child: _isLoading
